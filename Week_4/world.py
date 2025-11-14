@@ -39,8 +39,9 @@ def get_nearest_position(pos, boundary):
     tangent = normalise_vector(np.array([x2-x1, y2-y1]))
     normal = np.array([tangent[1], tangent[0]])
     x3, y3, x4, y4 = pos[0], pos[1], pos[0] + normal[0], pos[1] + normal[1]
-    t = ((x1-x3)*(y3-y4) - (y1-y3)*(x3-x4)) / ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4))
-    u = ((x1-x2)*(y1-y3) - (y1-y2)*(x1-x3)) / ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4))
+    # prevent division by zero
+    t = ((x1-x3)*(y3-y4) - (y1-y3)*(x3-x4)) / ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4)+0.0001)
+    u = ((x1-x2)*(y1-y3) - (y1-y2)*(x1-x3)) / ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4)+0.0001)
     if t<0:
         t = 0
     elif t>1:
@@ -255,7 +256,8 @@ class World:
         keys_to_remove = []
         for i, ped_i in self.pedestrians.items():
             if self.is_inside_polygon(ped_i.pos, ped_i.destination):
-                self.add_to_statistics(["completed_journeys", ped_i.source, ped_i.destination], self.time - ped_i.birth_time)
+                # fixed completed journeys recording
+                self.add_to_statistics(["completed_journeys"], self.time - ped_i.birth_time)
                 keys_to_remove.append(i)
         for key in keys_to_remove:
             self.pedestrians.pop(key, None)
